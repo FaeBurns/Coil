@@ -45,14 +45,9 @@ namespace Coil.Tests
             connectionManager.Connect(wire, wire2);
             connectionManager.Connect(wire2, wire3);
 
-            AssertContainsAll(connectionManager.GetConnections(wire), wire2);
-            AssertContainsAll(connectionManager.GetConnections(wire), wire3);
-            
-            AssertContainsAll(connectionManager.GetConnections(wire2), wire);
-            AssertContainsAll(connectionManager.GetConnections(wire2), wire3);
-            
-            AssertContainsAll(connectionManager.GetConnections(wire3), wire);
-            AssertContainsAll(connectionManager.GetConnections(wire3), wire2);
+            AssertContainsAll(connectionManager.GetConnections(wire), wire2, wire3);
+            AssertContainsAll(connectionManager.GetConnections(wire2), wire, wire3);
+            AssertContainsAll(connectionManager.GetConnections(wire3), wire, wire2);
         }
         
         [Test]
@@ -67,14 +62,32 @@ namespace Coil.Tests
             connectionManager.Connect(wire, wire2);
             connectionManager.Connect(wire, wire3);
 
-            AssertContainsAll(connectionManager.GetConnections(wire), wire2);
-            AssertContainsAll(connectionManager.GetConnections(wire), wire3);
+            AssertContainsAll(connectionManager.GetConnections(wire), wire2, wire3);
+            AssertContainsAll(connectionManager.GetConnections(wire2), wire, wire3);
+            AssertContainsAll(connectionManager.GetConnections(wire3), wire, wire2);
+        }
+
+        [Test]
+        public void Connect_4_Merge()
+        {
+            ConnectionManager connectionManager = new ConnectionManager();
+
+            Wire wire = new Wire();
+            Wire wire2 = new Wire();
+            Wire wire3 = new Wire();
+            Wire wire4 = new Wire();
+
+            // connect wires 1 and 2/3 and 4
+            connectionManager.Connect(wire, wire2);
+            connectionManager.Connect(wire3, wire4);
+
+            // connect the two networks
+            connectionManager.Connect(wire2, wire3);
             
-            AssertContainsAll(connectionManager.GetConnections(wire2), wire);
-            AssertContainsAll(connectionManager.GetConnections(wire2), wire3);
-            
-            AssertContainsAll(connectionManager.GetConnections(wire3), wire);
-            AssertContainsAll(connectionManager.GetConnections(wire3), wire2);
+            AssertContainsAll(connectionManager.GetConnections(wire), wire2, wire3, wire4);
+            AssertContainsAll(connectionManager.GetConnections(wire2), wire, wire3, wire4);
+            AssertContainsAll(connectionManager.GetConnections(wire3), wire, wire2, wire4);
+            AssertContainsAll(connectionManager.GetConnections(wire4), wire, wire2, wire3);
         }
         
         [Test]
