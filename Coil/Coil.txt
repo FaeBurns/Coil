@@ -1,0 +1,1 @@
+﻿Aim: A library that allows the getting and setting of specific values on "wires". These wires can be connected together to link the values between them
