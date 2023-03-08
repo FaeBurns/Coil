@@ -81,7 +81,8 @@ namespace Coil.Connections
         public void Disconnect(Wire wire1, Wire wire2)
         {
             // exit if neither of the wires have any local connections
-            if (!_localWireConnections.ContainsKey(wire1) || !_localWireConnections.ContainsKey(wire2)) 
+            if ((!_localWireConnections.ContainsKey(wire1) || !_localWireConnections.ContainsKey(wire2)) 
+                || (_localWireConnections[wire1].Count == 0 || _localWireConnections[wire2].Count == 0))
                 return;
 
             // remove each other from their local connections
@@ -100,7 +101,7 @@ namespace Coil.Connections
             
             // if wire2FindResult is true, but findResult is not, then there's a one-way local connection somewhere
             Debug.Assert(!wire2FindResult);
-
+            
             foreach (Wire wire in floodResult)
             {
                 // set global connections of wire to result from flood
@@ -109,7 +110,13 @@ namespace Coil.Connections
                 
                 // remove self from connection
                 _globalWireConnections[wire].Remove(wire);
+                
+                // set value provider to the one on wire1
+                wire.ValueProvider = wire1.ValueProvider;
             }
+            
+            // give wire2 a new value provider
+            wire2.ValueProvider = new SynchronizedValueSource();
             
             // do the same with wire2FloodResult
             foreach (Wire wire in wire2FloodResult)
@@ -117,9 +124,12 @@ namespace Coil.Connections
                 // set global connections of wire to result from flood
                 // create new hashset to avoid propagating unwanted changes
                 _globalWireConnections[wire] = new HashSet<Wire>(wire2FloodResult);
-                
+
                 // remove self from connection
                 _globalWireConnections[wire].Remove(wire);
+
+                //set value provider to the one on value2
+                wire.ValueProvider = wire2.ValueProvider;
             }
         }
 
