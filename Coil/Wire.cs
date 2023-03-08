@@ -69,13 +69,11 @@ namespace Coil
             ValueProvider.SynchronizedValue = new BoolValue(false);
         }
 
+#if DEBUG
         public override string ToString()
         {
-#if DEBUG
-            return base.ToString() + _wireIndex;
-#else
-            return base.ToString();
-#endif
+            return base.ToString() + (_wireIndex + 1);
         }
+#endif
     }
 }

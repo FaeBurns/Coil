@@ -173,6 +173,7 @@ namespace Coil.Tests
             // disconnect wires 1 and 2
             connectionManager.Disconnect(wire, wire2);
             
+            // everything should still be connected
             AssertContainsAll(connectionManager.GetConnections(wire), wire2, wire3);
             AssertContainsAll(connectionManager.GetConnections(wire2), wire, wire3);
             AssertContainsAll(connectionManager.GetConnections(wire3), wire, wire2);
@@ -193,11 +194,12 @@ namespace Coil.Tests
 
             // disconnect wires 1 and 2
             connectionManager.Disconnect(wire, wire2);
+            connectionManager.Disconnect(wire2, wire3);
             
-            // everything should still be connected
-            AssertContainsAll(connectionManager.GetConnections(wire), wire2, wire3);
-            AssertContainsAll(connectionManager.GetConnections(wire2), wire, wire3);
-            AssertContainsAll(connectionManager.GetConnections(wire3), wire, wire2);
+            // only wires 2 and 3 should be connected
+            AssertContainsAll(connectionManager.GetConnections(wire), wire3);
+            AssertContainsAll(connectionManager.GetConnections(wire2));
+            AssertContainsAll(connectionManager.GetConnections(wire3), wire);
         }
 
         [Test]
