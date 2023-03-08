@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Coil.Connections;
 using NUnit.Framework;
 
 namespace Coil.Tests
@@ -15,7 +15,9 @@ namespace Coil.Tests
             
             foreach (Wire wire in wires)
             {
-                Assert.Contains(wire, (ICollection<Wire>)collection);
+                bool contains = collection.Contains(wire);
+                
+                Assert.IsTrue(contains);
             }
         }
         
@@ -97,7 +99,7 @@ namespace Coil.Tests
             
             Wire wire = new Wire();
 
-            ArgumentException exception = Assert.Throws<ArgumentException>(connectionManager.Connect(wire, wire));
+            ArgumentException exception = Assert.Throws<ArgumentException>(() => connectionManager.Connect(wire, wire));
             Assert.That(exception.Message, Is.EqualTo("Cannot connect a wire to itself"));
         }
 
@@ -196,6 +198,21 @@ namespace Coil.Tests
             AssertContainsAll(connectionManager.GetConnections(wire), wire2, wire3);
             AssertContainsAll(connectionManager.GetConnections(wire2), wire, wire3);
             AssertContainsAll(connectionManager.GetConnections(wire3), wire, wire2);
+        }
+
+        [Test]
+        public void Connect_3_SameSource()
+        {
+            ConnectionManager connectionManager = new ConnectionManager();
+            Wire wire = new Wire();
+            Wire wire2 = new Wire();
+            Wire wire3 = new Wire();
+            
+            connectionManager.Connect(wire, wire2);
+            connectionManager.Connect(wire2, wire3);
+            
+            Assert.AreSame(wire.ValueProvider, wire2.ValueProvider);
+            Assert.AreSame(wire.ValueProvider, wire3.ValueProvider);
         }
     }
 }

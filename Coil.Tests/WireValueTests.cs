@@ -1,4 +1,4 @@
-﻿using System.Runtime.Remoting.Messaging;
+﻿using Coil.Connections;
 using NUnit.Framework;
 
 namespace Coil.Tests
@@ -14,7 +14,7 @@ namespace Coil.Tests
         }
         
         [Test]
-        public void StoresValue()
+        public void ClearsValue()
         {
             Wire wire = new Wire();
 
@@ -24,7 +24,7 @@ namespace Coil.Tests
             wire.Push(new BoolValue(true));
             Assert.IsTrue(wire.Peek().Value);
             
-            wire.Push(new BoolValue(false));
+            wire.Clear();
             Assert.IsFalse(wire.Peek().Value);
         }
 
