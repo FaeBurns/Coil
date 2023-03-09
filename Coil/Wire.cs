@@ -5,29 +5,28 @@ namespace Coil
 {
     /// <summary>
     /// <para>A Wire can be connected to other wires via the <see cref="ConnectionManager"/>.</para>
-    /// <para>Values pushed onto a wire will be found on all other wires - highest value wins.</para> 
+    /// <para>Values pushed onto a wire will be found on all other wires - highest value wins.</para>
     /// </summary>
     public class Wire
     {
-        
+
 #if DEBUG
         private readonly int _wireIndex;
         private static int _wireCount = 0;
 #endif
 
-        public Wire(SynchronizedValueSource token)
-        { 
-            ValueProvider = token;
+        public Wire(SynchronizedValueSource valueSource)
+        {
+            ValueProvider = valueSource;
 #if DEBUG
             _wireIndex = _wireCount;
             _wireCount++;
 #endif
         }
-        
+
         internal Wire()
         {
             ValueProvider = new SynchronizedValueSource();
-
 #if DEBUG
             _wireIndex = _wireCount;
             _wireCount++;
@@ -35,7 +34,7 @@ namespace Coil
         }
 
         /// <summary>
-        /// Gets or Sets the value source that synchronizes the value across wires 
+        /// Gets or Sets the value source that synchronizes the value across wires
         /// </summary>
         internal SynchronizedValueSource ValueProvider { get; set; }
 
