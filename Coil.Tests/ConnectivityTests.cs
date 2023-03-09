@@ -339,5 +339,61 @@ namespace Coil.Tests
             AssertContainsAll(connectionManager.GetGlobalConnections(wire4));
             AssertContainsAll(connectionManager.GetGlobalConnections(wire5));
         }
+
+        [Test]
+        public void DualConnection_Connect()
+        {
+            ConnectionManager connectionManager = new ConnectionManager();
+            
+            Wire wire1 = new Wire();
+            Wire wire2 = new Wire();
+
+            connectionManager.Connect(wire1, wire2);
+            connectionManager.Connect(wire1, wire2);
+            
+            AssertContainsAll(connectionManager.GetGlobalConnections(wire1), wire2);
+            AssertContainsAll(connectionManager.GetLocalConnections(wire1), wire2);
+            AssertContainsAll(connectionManager.GetGlobalConnections(wire2), wire1);
+            AssertContainsAll(connectionManager.GetLocalConnections(wire2), wire1);
+        }
+
+        [Test]
+        public void DualConnection_Disconnect_Single()
+        {
+            ConnectionManager connectionManager = new ConnectionManager();
+
+            Wire wire1 = new Wire();
+            Wire wire2 = new Wire();
+
+            connectionManager.Connect(wire1, wire2);
+            connectionManager.Connect(wire1, wire2);
+            
+            connectionManager.Disconnect(wire1, wire2);
+            
+            AssertContainsAll(connectionManager.GetGlobalConnections(wire1), wire2);
+            AssertContainsAll(connectionManager.GetLocalConnections(wire1), wire2);
+            AssertContainsAll(connectionManager.GetGlobalConnections(wire2), wire1);
+            AssertContainsAll(connectionManager.GetLocalConnections(wire2), wire1);
+        }
+
+        [Test]
+        public void DualConnection_Disconnect_All()
+        {
+            ConnectionManager connectionManager = new ConnectionManager();
+
+            Wire wire1 = new Wire();
+            Wire wire2 = new Wire();
+
+            connectionManager.Connect(wire1, wire2);
+            connectionManager.Connect(wire1, wire2);
+            
+            connectionManager.Disconnect(wire1, wire2);
+            connectionManager.Disconnect(wire1, wire2);
+            
+            AssertContainsAll(connectionManager.GetGlobalConnections(wire1));
+            AssertContainsAll(connectionManager.GetLocalConnections(wire1));
+            AssertContainsAll(connectionManager.GetGlobalConnections(wire2));
+            AssertContainsAll(connectionManager.GetLocalConnections(wire2));
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using Coil.Connections;
 
 namespace Coil
@@ -69,6 +70,7 @@ namespace Coil
         }
 
 #if DEBUG
+        [ExcludeFromCodeCoverage]
         public override string ToString()
         {
             return base.ToString() + (_wireIndex + 1);

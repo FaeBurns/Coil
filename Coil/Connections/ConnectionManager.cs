@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 namespace Coil.Connections
 {
@@ -12,7 +13,7 @@ namespace Coil.Connections
         /// <summary>
         /// A mapping of wires to all the wire's they are directly connected to.
         /// </summary>
-        private readonly WireConnections _localWireConnections = new WireConnections();
+        private readonly LocalWireConnections _localWireConnections = new LocalWireConnections();
 
         /// <summary>
         /// A mapping of wires to all the wires they are connected to globally
@@ -68,14 +69,8 @@ namespace Coil.Connections
             }
 
             // perform local connections
-
-            // add wires to local connections if not already there
-            if (!_localWireConnections.ContainsKey(wire1)) _localWireConnections.Add(wire1, new HashSet<Wire>());
-            if (!_localWireConnections.ContainsKey(wire2)) _localWireConnections.Add(wire2, new HashSet<Wire>());
-
-            // create connections
-            _localWireConnections[wire1].Add(wire2);
-            _localWireConnections[wire2].Add(wire1);
+            AddLocalConnection(wire1, wire2);
+            AddLocalConnection(wire2, wire1);
         }
 
         public void Disconnect(Wire wire1, Wire wire2)
@@ -86,8 +81,16 @@ namespace Coil.Connections
                 return;
 
             // remove each other from their local connections
-            _localWireConnections[wire1].Remove(wire2);
-            _localWireConnections[wire2].Remove(wire1);
+            bool removed1 = RemoveLocalConnection(wire1, wire2);
+            bool removed2 = RemoveLocalConnection(wire2, wire1);
+            
+            // if they don't share the same value, something went wrong somewhere
+            Debug.Assert(removed1 == removed2);
+
+            // don't need to check multiple - only check one
+            // if no removal occured, the connection still exists
+            if (!removed1)
+                return;
 
             HashSet<Wire> floodResult = new HashSet<Wire>();
             bool findResult = FloodFindRecursive(wire1, wire2, floodResult);
@@ -131,13 +134,26 @@ namespace Coil.Connections
                 //set value provider to the one on value2
                 wire.ValueProvider = wire2.ValueProvider;
             }
+
+            // remove wires from connection mappings if they have no connections
+            if (_localWireConnections[wire1].Count == 0)
+                _localWireConnections.Remove(wire1);
+
+            if (_localWireConnections[wire2].Count == 0)
+                _localWireConnections.Remove(wire2);
+
+            if (_globalWireConnections[wire1].Count == 0)
+                _globalWireConnections.Remove(wire1);
+
+            if (_globalWireConnections[wire2].Count == 0)
+                _globalWireConnections.Remove(wire2);
         }
 
         private bool FloodFindRecursive(Wire wire, Wire target, HashSet<Wire> found)
         {
             // add self to result
             found.Add(wire);
-            foreach (Wire connectedWire in _localWireConnections[wire])
+            foreach (Wire connectedWire in _localWireConnections[wire].Keys)
             {
                 // ignore if already found - prevent loops
                 if (found.Contains(connectedWire))
@@ -173,7 +189,49 @@ namespace Coil.Connections
             if (!_localWireConnections.ContainsKey(wire))
                 return Array.Empty<Wire>();
 
-            return _localWireConnections[wire];
+            return _localWireConnections[wire].Keys.ToArray();
+        }
+
+        /// <summary>
+        /// Creates a one-way local connection from wire <paramref name="from"/> to wire <paramref name="to"/>.
+        /// </summary>
+        /// <param name="from">The first connecting wire</param>
+        /// <param name="to">The second connecting wire</param>
+        private void AddLocalConnection(Wire from, Wire to)
+        {
+            // add wires to local connections if not already there
+            if (!_localWireConnections.ContainsKey(from)) _localWireConnections.Add(from, new LocalMapping());
+            
+            // either create entry for the to wire
+            // or increment entry
+            if (!_localWireConnections[from].ContainsKey(to))
+            {
+                _localWireConnections[from].Add(to, 1);
+            }
+            else
+            {
+                _localWireConnections[from][to]++;
+            }
+        }
+
+        /// <summary>
+        /// Removes the local connection between two wires.
+        /// <param name="from">The wire that contains the connection.</param>
+        /// <param name="to">The wire being removed.</param>
+        /// </summary>
+        /// <returns><see langword="true"/> if there are no more connections left to that wire; otherwise <see langword="false"/>.</returns>
+        private bool RemoveLocalConnection(Wire from, Wire to)
+        {
+            // decrement connection count
+            _localWireConnections[from][to]--;
+
+            // if there is at least one connection, return false
+            if (_localWireConnections[from][to] > 0)
+                return false;
+            
+            // otherwise remove the local connection and return true
+            _localWireConnections[from].Remove(to);
+            return true;
         }
     }
 
@@ -181,4 +239,14 @@ namespace Coil.Connections
     /// A mapping of wires to their connected wires.
     /// </summary>
     internal class WireConnections : Dictionary<Wire, HashSet<Wire>> { }
+    
+    /// <summary>
+    /// A mapping of wires to their connected wires, including a count for those connections
+    /// </summary>
+    internal class LocalWireConnections : Dictionary<Wire, LocalMapping> { }
+
+    /// <summary>
+    /// A container class that holds a set of connections and a counting of how many connections they hold
+    /// </summary>
+    internal class LocalMapping : Dictionary<Wire, int> { }
 }
