@@ -75,6 +75,9 @@ namespace Coil.Connections
 
         public void Disconnect(Wire wire1, Wire wire2)
         {
+            if (wire1 == wire2)
+                throw new ArgumentException("Cannot disconnect wire from itself");
+
             // exit if neither of the wires have any local connections
             if ((!_localWireConnections.ContainsKey(wire1) || !_localWireConnections.ContainsKey(wire2))
                 || (_localWireConnections[wire1].Count == 0 || _localWireConnections[wire2].Count == 0))
@@ -83,7 +86,7 @@ namespace Coil.Connections
             // remove each other from their local connections
             bool removed1 = RemoveLocalConnection(wire1, wire2);
             bool removed2 = RemoveLocalConnection(wire2, wire1);
-            
+
             // if they don't share the same value, something went wrong somewhere
             Debug.Assert(removed1 == removed2);
 
@@ -201,7 +204,7 @@ namespace Coil.Connections
         {
             // add wires to local connections if not already there
             if (!_localWireConnections.ContainsKey(from)) _localWireConnections.Add(from, new LocalMapping());
-            
+
             // either create entry for the to wire
             // or increment entry
             if (!_localWireConnections[from].ContainsKey(to))
@@ -228,7 +231,7 @@ namespace Coil.Connections
             // if there is at least one connection, return false
             if (_localWireConnections[from][to] > 0)
                 return false;
-            
+
             // otherwise remove the local connection and return true
             _localWireConnections[from].Remove(to);
             return true;
@@ -239,7 +242,7 @@ namespace Coil.Connections
     /// A mapping of wires to their connected wires.
     /// </summary>
     internal class WireConnections : Dictionary<Wire, HashSet<Wire>> { }
-    
+
     /// <summary>
     /// A mapping of wires to their connected wires, including a count for those connections
     /// </summary>
