@@ -5,6 +5,16 @@ namespace Coil.Connections
 {
     public class SynchronizedValueSource
     {
-        public BoolValue SynchronizedValue { get; set; } = new BoolValue(false);
+        private BoolValue _synchronizedValue = new BoolValue(false);
+
+        public BoolValue SynchronizedValue
+        {
+            get => _synchronizedValue;
+            set
+            {
+                ValuePushedNotifier.NotifyValuePushed(this);
+                _synchronizedValue = value;
+            }
+        }
     }
 }

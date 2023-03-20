@@ -42,6 +42,7 @@
         <Compile Include="Connections\SynchronizedValueSource.cs" />
         <Compile Include="BoolValue.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />
+        <Compile Include="ValuePushedNotifier.cs" />
         <Compile Include="Wire.cs" />
     </ItemGroup>
     <ItemGroup>

@@ -79,8 +79,7 @@ namespace Coil.Connections
                 throw new ArgumentException("Cannot disconnect wire from itself");
 
             // exit if neither of the wires have any local connections
-            if ((!_localWireConnections.ContainsKey(wire1) || !_localWireConnections.ContainsKey(wire2))
-                || (_localWireConnections[wire1].Count == 0 || _localWireConnections[wire2].Count == 0))
+            if (!HasLocalConnections(wire1) && !HasLocalConnections(wire2))
                 return;
 
             // remove each other from their local connections
@@ -193,6 +192,34 @@ namespace Coil.Connections
                 return Array.Empty<Wire>();
 
             return _localWireConnections[wire].Keys.ToArray();
+        }
+
+        public bool HasLocalConnections(Wire wire)
+        {
+            if (_localWireConnections.ContainsKey(wire))
+                return _localWireConnections[wire].Count > 0;
+            return false;
+        }
+
+        public bool HasGlobalConnections(Wire wire)
+        {
+            if (_globalWireConnections.ContainsKey(wire))
+                return _globalWireConnections[wire].Count > 0;
+            return false;
+        }
+
+        public bool HasLocalConnectionTo(Wire wire1, Wire wire2)
+        {
+            if (_localWireConnections.ContainsKey(wire1))
+                return _localWireConnections[wire1].ContainsKey(wire2);
+            return false;
+        }
+
+        public bool HasGlobalConnectionTo(Wire wire1, Wire wire2)
+        {
+            if (_globalWireConnections.ContainsKey(wire1))
+                return _globalWireConnections[wire1].Contains(wire2);
+            return false;
         }
 
         /// <summary>
