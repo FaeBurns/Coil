@@ -1,5 +1,4 @@
-﻿using System;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using Coil.Connections;
 
 namespace Coil
@@ -13,9 +12,10 @@ namespace Coil
 
 #if DEBUG
         private readonly int _wireIndex;
-        private static int _wireCount = 0;
+        private static int _wireCount;
 #endif
 
+        [ExcludeFromCodeCoverage]
         public Wire(SynchronizedValueSource valueSource)
         {
             ValueProvider = valueSource;
@@ -25,7 +25,8 @@ namespace Coil
 #endif
         }
 
-        internal Wire()
+        [ExcludeFromCodeCoverage]
+        public Wire()
         {
             ValueProvider = new SynchronizedValueSource();
 #if DEBUG
@@ -48,7 +49,7 @@ namespace Coil
             // only push a true value
             if (value.Value)
             {
-                ValueProvider.SynchronizedValue = value;
+                ValueProvider.PushValue(this, value);
             }
         }
 
@@ -67,6 +68,7 @@ namespace Coil
         public void Clear()
         {
             ValueProvider.SynchronizedValue = new BoolValue(false);
+            ValueProvider.PushSourceWires.Clear();
         }
 
 #if DEBUG

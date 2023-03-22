@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace Coil.Connections
@@ -27,6 +28,14 @@ namespace Coil.Connections
 
             // get value source to use from wire1
             SynchronizedValueSource newSharedProvider = wire1.ValueProvider;
+
+            // get the value on wire2 and set wire1's value based on what was found
+            // if either providers have a true value, set the new value to true
+            bool wire2Value = wire2.ValueProvider.SynchronizedValue.Value;
+            newSharedProvider.SynchronizedValue = new BoolValue(wire2Value || newSharedProvider.SynchronizedValue.Value);
+
+            // merge source wire collections
+            newSharedProvider.PushSourceWires.AddRange(wire2.ValueProvider.PushSourceWires);
 
             // share to wire2
             wire2.ValueProvider = newSharedProvider;
@@ -107,6 +116,21 @@ namespace Coil.Connections
             // if wire2FindResult is true, but findResult is not, then there's a one-way local connection somewhere
             Debug.Assert(!wire2FindResult);
 
+            List<Wire> pushingWiresInFlood1 = new List<Wire>();
+            List<Wire> pushingWiresInFlood2 = new List<Wire>();
+
+            foreach (Wire pushingWire in wire1.ValueProvider.PushSourceWires)
+            {
+                if (floodResult.Contains(pushingWire))
+                    pushingWiresInFlood1.Add(pushingWire);
+
+                else if (wire2FloodResult.Contains(pushingWire))
+                    pushingWiresInFlood2.Add(pushingWire);
+            }
+
+            wire1.ValueProvider.SynchronizedValue = new BoolValue(pushingWiresInFlood1.Count > 0);
+            wire1.ValueProvider.PushSourceWires = pushingWiresInFlood1;
+
             foreach (Wire wire in floodResult)
             {
                 // set global connections of wire to result from flood
@@ -121,7 +145,10 @@ namespace Coil.Connections
             }
 
             // give wire2 a new value provider
-            wire2.ValueProvider = new SynchronizedValueSource();
+            wire2.ValueProvider = new SynchronizedValueSource(new BoolValue(pushingWiresInFlood2.Count > 0))
+            {
+                PushSourceWires = pushingWiresInFlood2,
+            };
 
             // do the same with wire2FloodResult
             foreach (Wire wire in wire2FloodResult)
@@ -180,7 +207,7 @@ namespace Coil.Connections
 
         public IReadOnlyCollection<Wire> GetGlobalConnections(Wire wire)
         {
-            if (!_globalWireConnections.ContainsKey(wire))
+            if (!HasGlobalConnections(wire))
                 return Array.Empty<Wire>();
 
             return _globalWireConnections[wire];
@@ -188,7 +215,7 @@ namespace Coil.Connections
 
         public IReadOnlyCollection<Wire> GetLocalConnections(Wire wire)
         {
-            if (!_localWireConnections.ContainsKey(wire))
+            if (!HasLocalConnections(wire))
                 return Array.Empty<Wire>();
 
             return _localWireConnections[wire].Keys.ToArray();
@@ -208,6 +235,7 @@ namespace Coil.Connections
             return false;
         }
 
+        [ExcludeFromCodeCoverage]
         public bool HasLocalConnectionTo(Wire wire1, Wire wire2)
         {
             if (_localWireConnections.ContainsKey(wire1))
@@ -215,6 +243,7 @@ namespace Coil.Connections
             return false;
         }
 
+        [ExcludeFromCodeCoverage]
         public bool HasGlobalConnectionTo(Wire wire1, Wire wire2)
         {
             if (_globalWireConnections.ContainsKey(wire1))

@@ -344,13 +344,13 @@ namespace Coil.Tests
         public void DualConnection_Connect()
         {
             ConnectionManager connectionManager = new ConnectionManager();
-            
+
             Wire wire1 = new Wire();
             Wire wire2 = new Wire();
 
             connectionManager.Connect(wire1, wire2);
             connectionManager.Connect(wire1, wire2);
-            
+
             AssertContainsAll(connectionManager.GetGlobalConnections(wire1), wire2);
             AssertContainsAll(connectionManager.GetLocalConnections(wire1), wire2);
             AssertContainsAll(connectionManager.GetGlobalConnections(wire2), wire1);
@@ -367,9 +367,9 @@ namespace Coil.Tests
 
             connectionManager.Connect(wire1, wire2);
             connectionManager.Connect(wire1, wire2);
-            
+
             connectionManager.Disconnect(wire1, wire2);
-            
+
             AssertContainsAll(connectionManager.GetGlobalConnections(wire1), wire2);
             AssertContainsAll(connectionManager.GetLocalConnections(wire1), wire2);
             AssertContainsAll(connectionManager.GetGlobalConnections(wire2), wire1);
@@ -386,14 +386,24 @@ namespace Coil.Tests
 
             connectionManager.Connect(wire1, wire2);
             connectionManager.Connect(wire1, wire2);
-            
+
             connectionManager.Disconnect(wire1, wire2);
             connectionManager.Disconnect(wire1, wire2);
-            
+
             AssertContainsAll(connectionManager.GetGlobalConnections(wire1));
             AssertContainsAll(connectionManager.GetLocalConnections(wire1));
             AssertContainsAll(connectionManager.GetGlobalConnections(wire2));
             AssertContainsAll(connectionManager.GetLocalConnections(wire2));
+        }
+
+        [Test]
+        public void Disconnect_Self()
+        {
+            ConnectionManager connectionManager = new ConnectionManager();
+
+            Wire wire1 = new Wire();
+
+            Assert.Throws<ArgumentException>(() => connectionManager.Disconnect(wire1, wire1), "Cannot disconnect wire from itself");
         }
     }
 }

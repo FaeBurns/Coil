@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using Coil.Connections;
 
 namespace Coil
 {
+    [ExcludeFromCodeCoverage]
     public static class ValuePushedNotifier
     {
         public static EventHandler ValuePushed;
