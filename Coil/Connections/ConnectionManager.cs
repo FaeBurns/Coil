@@ -27,18 +27,13 @@ namespace Coil.Connections
                 throw new ArgumentException("Cannot connect a wire to itself");
 
             // get value source to use from wire1
-            SynchronizedValueSource newSharedProvider = wire1.ValueProvider;
-
-            // get the value on wire2 and set wire1's value based on what was found
-            // if either providers have a true value, set the new value to true
-            bool wire2Value = wire2.ValueProvider.SynchronizedValue.Value;
-            newSharedProvider.SynchronizedValue = new BoolValue(wire2Value || newSharedProvider.SynchronizedValue.Value);
+            SynchronizedPowerSource newSharedProvider = wire1.PowerProvider;
 
             // merge source wire collections
-            newSharedProvider.PushSourceWires.AddRange(wire2.ValueProvider.PushSourceWires);
+            newSharedProvider.PowerSourceWires.AddRange(wire2.PowerProvider.PowerSourceWires);
 
             // share to wire2
-            wire2.ValueProvider = newSharedProvider;
+            wire2.PowerProvider = newSharedProvider;
 
             // if the wires do not have any recorded connections
             // add them to the dictionary
@@ -74,7 +69,7 @@ namespace Coil.Connections
                 _globalWireConnections[connectedWire].Remove(connectedWire);
 
                 // set value provider token on connected wire
-                connectedWire.ValueProvider = newSharedProvider;
+                connectedWire.PowerProvider = newSharedProvider;
             }
 
             // perform local connections
@@ -119,7 +114,7 @@ namespace Coil.Connections
             List<Wire> pushingWiresInFlood1 = new List<Wire>();
             List<Wire> pushingWiresInFlood2 = new List<Wire>();
 
-            foreach (Wire pushingWire in wire1.ValueProvider.PushSourceWires)
+            foreach (Wire pushingWire in wire1.PowerProvider.PowerSourceWires)
             {
                 if (floodResult.Contains(pushingWire))
                     pushingWiresInFlood1.Add(pushingWire);
@@ -127,9 +122,9 @@ namespace Coil.Connections
                 else if (wire2FloodResult.Contains(pushingWire))
                     pushingWiresInFlood2.Add(pushingWire);
             }
-
-            wire1.ValueProvider.SynchronizedValue = new BoolValue(pushingWiresInFlood1.Count > 0);
-            wire1.ValueProvider.PushSourceWires = pushingWiresInFlood1;
+            
+            // set the source wires on wire1 to the flood find result - removes all no longer connected
+            wire1.PowerProvider.PowerSourceWires = pushingWiresInFlood1;
 
             foreach (Wire wire in floodResult)
             {
@@ -141,13 +136,13 @@ namespace Coil.Connections
                 _globalWireConnections[wire].Remove(wire);
 
                 // set value provider to the one on wire1
-                wire.ValueProvider = wire1.ValueProvider;
+                wire.PowerProvider = wire1.PowerProvider;
             }
 
             // give wire2 a new value provider
-            wire2.ValueProvider = new SynchronizedValueSource(new BoolValue(pushingWiresInFlood2.Count > 0))
+            wire2.PowerProvider = new SynchronizedPowerSource
             {
-                PushSourceWires = pushingWiresInFlood2,
+                PowerSourceWires = pushingWiresInFlood2,
             };
 
             // do the same with wire2FloodResult
@@ -161,7 +156,7 @@ namespace Coil.Connections
                 _globalWireConnections[wire].Remove(wire);
 
                 //set value provider to the one on value2
-                wire.ValueProvider = wire2.ValueProvider;
+                wire.PowerProvider = wire2.PowerProvider;
             }
 
             // remove wires from connection mappings if they have no connections

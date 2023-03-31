@@ -80,8 +80,8 @@ namespace Coil.Tests
             connectionManager.Connect(wire, wire2);
             connectionManager.Connect(wire2, wire3);
 
-            Assert.AreSame(wire.ValueProvider, wire2.ValueProvider);
-            Assert.AreSame(wire.ValueProvider, wire3.ValueProvider);
+            Assert.AreSame(wire.PowerProvider, wire2.PowerProvider);
+            Assert.AreSame(wire.PowerProvider, wire3.PowerProvider);
         }
 
         [Test]
@@ -121,11 +121,11 @@ namespace Coil.Tests
         [Test]
         public void StartConnected()
         {
-            SynchronizedValueSource valueSource = new SynchronizedValueSource();
-            Wire wire1 = new Wire(valueSource);
-            Wire wire2 = new Wire(valueSource);
+            SynchronizedPowerSource powerSource = new SynchronizedPowerSource();
+            Wire wire1 = new Wire(powerSource);
+            Wire wire2 = new Wire(powerSource);
 
-            Assert.AreSame(wire1.ValueProvider, wire2.ValueProvider);
+            Assert.AreSame(wire1.PowerProvider, wire2.PowerProvider);
         }
 
         [Test]
@@ -237,11 +237,11 @@ namespace Coil.Tests
 
             connectionManager.Connect(wire1, wire2);
 
-            Assert.AreSame(wire1.ValueProvider, wire2.ValueProvider);
+            Assert.AreSame(wire1.PowerProvider, wire2.PowerProvider);
 
             connectionManager.Disconnect(wire1, wire2);
 
-            Assert.AreNotSame(wire1.ValueProvider, wire2.ValueProvider);
+            Assert.AreNotSame(wire1.PowerProvider, wire2.PowerProvider);
         }
 
         [Test]
@@ -258,15 +258,15 @@ namespace Coil.Tests
             connectionManager.Connect(wire2, wire3);
             connectionManager.Connect(wire3, wire4);
 
-            Assert.AreSame(wire1.ValueProvider, wire2.ValueProvider);
-            Assert.AreSame(wire1.ValueProvider, wire3.ValueProvider);
-            Assert.AreSame(wire1.ValueProvider, wire4.ValueProvider);
+            Assert.AreSame(wire1.PowerProvider, wire2.PowerProvider);
+            Assert.AreSame(wire1.PowerProvider, wire3.PowerProvider);
+            Assert.AreSame(wire1.PowerProvider, wire4.PowerProvider);
 
             connectionManager.Disconnect(wire2, wire3);
 
-            Assert.AreSame(wire1.ValueProvider, wire2.ValueProvider);
-            Assert.AreNotSame(wire2.ValueProvider, wire3.ValueProvider);
-            Assert.AreSame(wire3.ValueProvider, wire4.ValueProvider);
+            Assert.AreSame(wire1.PowerProvider, wire2.PowerProvider);
+            Assert.AreNotSame(wire2.PowerProvider, wire3.PowerProvider);
+            Assert.AreSame(wire3.PowerProvider, wire4.PowerProvider);
         }
 
         [Test]

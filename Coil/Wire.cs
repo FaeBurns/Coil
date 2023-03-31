@@ -16,9 +16,9 @@ namespace Coil
 #endif
 
         [ExcludeFromCodeCoverage]
-        public Wire(SynchronizedValueSource valueSource)
+        public Wire(SynchronizedPowerSource powerSource)
         {
-            ValueProvider = valueSource;
+            PowerProvider = powerSource;
 #if DEBUG
             _wireIndex = _wireCount;
             _wireCount++;
@@ -28,7 +28,7 @@ namespace Coil
         [ExcludeFromCodeCoverage]
         public Wire()
         {
-            ValueProvider = new SynchronizedValueSource();
+            PowerProvider = new SynchronizedPowerSource();
 #if DEBUG
             _wireIndex = _wireCount;
             _wireCount++;
@@ -38,28 +38,31 @@ namespace Coil
         /// <summary>
         /// Gets or Sets the value source that synchronizes the value across wires
         /// </summary>
-        internal SynchronizedValueSource ValueProvider { get; set; }
+        internal SynchronizedPowerSource PowerProvider { get; set; }
 
         /// <summary>
-        /// Pushes a new value onto the wire. The value will only be pushed if it is greater than the value currently on the wire.
+        /// Powers this wire.
         /// </summary>
-        /// <param name="value">The value to push.</param>
-        public void Push(BoolValue value)
+        public void Power()
         {
-            // only push a true value
-            if (value.Value)
-            {
-                ValueProvider.PushValue(this, value);
-            }
+            PowerProvider.MarkPowered(this);
+        }
+
+        /// <summary>
+        /// UnPowers this wire.
+        /// </summary>
+        public void UnPower()
+        {
+            PowerProvider.MarkUnpowered(this);
         }
 
         /// <summary>
         /// Fetches the value on the wire.
         /// </summary>
         /// <returns>The resulting value.</returns>
-        public BoolValue Peek()
+        public bool Peek()
         {
-            return ValueProvider.SynchronizedValue;
+            return PowerProvider.IsPowered;
         }
 
         /// <summary>
@@ -67,8 +70,7 @@ namespace Coil
         /// </summary>
         public void Clear()
         {
-            ValueProvider.SynchronizedValue = new BoolValue(false);
-            ValueProvider.PushSourceWires.Clear();
+            PowerProvider.Reset();
         }
 
 #if DEBUG

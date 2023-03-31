@@ -9,7 +9,7 @@ namespace Coil
     {
         public static EventHandler ValuePushed;
 
-        internal static void NotifyValuePushed(SynchronizedValueSource changedSource)
+        internal static void NotifyValuePushed(SynchronizedPowerSource changedSource)
         {
             ValuePushed?.Invoke(changedSource, EventArgs.Empty);
         }

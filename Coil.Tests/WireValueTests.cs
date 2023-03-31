@@ -10,7 +10,7 @@ namespace Coil.Tests
         public void InitialValue()
         {
             Wire wire = new Wire();
-            Assert.IsFalse(wire.Peek().Value);
+            Assert.IsFalse(wire.Peek());
         }
 
         [Test]
@@ -18,14 +18,14 @@ namespace Coil.Tests
         {
             Wire wire = new Wire();
 
-            wire.Push(new BoolValue(false));
-            Assert.IsFalse(wire.Peek().Value);
+            wire.UnPower();
+            Assert.IsFalse(wire.Peek());
 
-            wire.Push(new BoolValue(true));
-            Assert.IsTrue(wire.Peek().Value);
+            wire.Power();
+            Assert.IsTrue(wire.Peek());
 
             wire.Clear();
-            Assert.IsFalse(wire.Peek().Value);
+            Assert.IsFalse(wire.Peek());
         }
 
         [Test]
@@ -39,9 +39,9 @@ namespace Coil.Tests
             connectionManager.Connect(wire, wire2);
 
             // check that value on wire2 changes when pushed to wire1
-            Assert.IsFalse(wire2.Peek().Value);
-            wire.Push(new BoolValue(true));
-            Assert.IsTrue(wire2.Peek().Value);
+            Assert.IsFalse(wire2.Peek());
+            wire.Power();
+            Assert.IsTrue(wire2.Peek());
         }
 
         [Test]
@@ -57,9 +57,9 @@ namespace Coil.Tests
             connectionManager.Connect(wire2, wire3);
 
             // check that value on wire3 changes when pushed to wire1
-            Assert.IsFalse(wire3.Peek().Value);
-            wire.Push(new BoolValue(true));
-            Assert.IsTrue(wire3.Peek().Value);
+            Assert.IsFalse(wire3.Peek());
+            wire.Power();
+            Assert.IsTrue(wire3.Peek());
         }
 
         [Test]
@@ -67,12 +67,12 @@ namespace Coil.Tests
         {
             Wire wire = new Wire();
 
-            wire.Push(new BoolValue(true));
-            Assert.IsTrue(wire.Peek().Value);
+            wire.Power();
+            Assert.IsTrue(wire.Peek());
 
             // check that value does not change to false when the value is already true
-            wire.Push(new BoolValue(false));
-            Assert.IsTrue(wire.Peek().Value);
+            wire.Power();
+            Assert.IsTrue(wire.Peek());
         }
 
         [Test]
@@ -83,10 +83,10 @@ namespace Coil.Tests
             Wire wire1 = new Wire();
             Wire wire2 = new Wire();
 
-            wire1.Push(new BoolValue(true));
+            wire1.Power();
             connectionManager.Connect(wire1, wire2);
-            Assert.IsTrue(wire1.Peek().Value);
-            Assert.IsTrue(wire2.Peek().Value);
+            Assert.IsTrue(wire1.Peek());
+            Assert.IsTrue(wire2.Peek());
         }
 
         [Test]
@@ -99,18 +99,18 @@ namespace Coil.Tests
             Wire wire3 = new Wire();
             Wire wire4 = new Wire();
 
-            wire1.Push(new BoolValue(true));
-            wire4.Push(new BoolValue(true));
+            wire1.Power();
+            wire4.Power();
             connectionManager.Connect(wire1, wire2);
             connectionManager.Connect(wire2, wire3);
             connectionManager.Connect(wire3, wire4);
-            Assert.IsTrue(wire1.Peek().Value);
-            Assert.IsTrue(wire2.Peek().Value);
-            Assert.IsTrue(wire3.Peek().Value);
-            Assert.IsTrue(wire4.Peek().Value);
+            Assert.IsTrue(wire1.Peek());
+            Assert.IsTrue(wire2.Peek());
+            Assert.IsTrue(wire3.Peek());
+            Assert.IsTrue(wire4.Peek());
 
-            Assert.Contains(wire1, wire1.ValueProvider.PushSourceWires);
-            Assert.Contains(wire4, wire1.ValueProvider.PushSourceWires);
+            Assert.Contains(wire1, wire1.PowerProvider.PowerSourceWires);
+            Assert.Contains(wire4, wire1.PowerProvider.PowerSourceWires);
         }
 
         [Test]
@@ -121,13 +121,13 @@ namespace Coil.Tests
             Wire wire1 = new Wire();
             Wire wire2 = new Wire();
 
-            wire1.Push(new BoolValue(true));
+            wire1.Power();
             connectionManager.Connect(wire1, wire2);
-            Assert.IsTrue(wire2.Peek().Value);
+            Assert.IsTrue(wire2.Peek());
 
             connectionManager.Disconnect(wire1, wire2);
-            Assert.IsTrue(wire1.Peek().Value);
-            Assert.IsFalse(wire2.Peek().Value);
+            Assert.IsTrue(wire1.Peek());
+            Assert.IsFalse(wire2.Peek());
         }
 
         [Test]
@@ -138,13 +138,13 @@ namespace Coil.Tests
             Wire wire1 = new Wire();
             Wire wire2 = new Wire();
 
-            wire1.Push(new BoolValue(true));
+            wire1.Power();
             connectionManager.Connect(wire1, wire2);
-            Assert.IsTrue(wire2.Peek().Value);
+            Assert.IsTrue(wire2.Peek());
 
             connectionManager.Disconnect(wire2, wire1);
-            Assert.IsTrue(wire1.Peek().Value);
-            Assert.IsFalse(wire2.Peek().Value);
+            Assert.IsTrue(wire1.Peek());
+            Assert.IsFalse(wire2.Peek());
         }
 
         [Test]
@@ -157,20 +157,20 @@ namespace Coil.Tests
             Wire wire3 = new Wire();
             Wire wire4 = new Wire();
 
-            wire1.Push(new BoolValue(true));
+            wire1.Power();
             connectionManager.Connect(wire1, wire2);
             connectionManager.Connect(wire2, wire3);
             connectionManager.Connect(wire3, wire4);
-            Assert.IsTrue(wire1.Peek().Value);
-            Assert.IsTrue(wire2.Peek().Value);
-            Assert.IsTrue(wire3.Peek().Value);
-            Assert.IsTrue(wire4.Peek().Value);
+            Assert.IsTrue(wire1.Peek());
+            Assert.IsTrue(wire2.Peek());
+            Assert.IsTrue(wire3.Peek());
+            Assert.IsTrue(wire4.Peek());
 
             connectionManager.Disconnect(wire2, wire3);
-            Assert.IsTrue(wire1.Peek().Value);
-            Assert.IsTrue(wire2.Peek().Value);
-            Assert.IsFalse(wire3.Peek().Value);
-            Assert.IsFalse(wire4.Peek().Value);
+            Assert.IsTrue(wire1.Peek());
+            Assert.IsTrue(wire2.Peek());
+            Assert.IsFalse(wire3.Peek());
+            Assert.IsFalse(wire4.Peek());
         }
 
         [Test]
@@ -183,20 +183,20 @@ namespace Coil.Tests
             Wire wire3 = new Wire();
             Wire wire4 = new Wire();
 
-            wire1.Push(new BoolValue(true));
+            wire1.Power();
             connectionManager.Connect(wire1, wire2);
             connectionManager.Connect(wire2, wire3);
             connectionManager.Connect(wire3, wire4);
-            Assert.IsTrue(wire1.Peek().Value);
-            Assert.IsTrue(wire2.Peek().Value);
-            Assert.IsTrue(wire3.Peek().Value);
-            Assert.IsTrue(wire4.Peek().Value);
+            Assert.IsTrue(wire1.Peek());
+            Assert.IsTrue(wire2.Peek());
+            Assert.IsTrue(wire3.Peek());
+            Assert.IsTrue(wire4.Peek());
 
             connectionManager.Disconnect(wire3, wire2);
-            Assert.IsTrue(wire1.Peek().Value);
-            Assert.IsTrue(wire2.Peek().Value);
-            Assert.IsFalse(wire3.Peek().Value);
-            Assert.IsFalse(wire4.Peek().Value);
+            Assert.IsTrue(wire1.Peek());
+            Assert.IsTrue(wire2.Peek());
+            Assert.IsFalse(wire3.Peek());
+            Assert.IsFalse(wire4.Peek());
         }
 
         [Test]
@@ -209,29 +209,29 @@ namespace Coil.Tests
             Wire wire3 = new Wire();
             Wire wire4 = new Wire();
 
-            wire1.Push(new BoolValue(true));
-            wire4.Push(new BoolValue(true));
+            wire1.Power();
+            wire4.Power();
             connectionManager.Connect(wire1, wire2);
             connectionManager.Connect(wire2, wire3);
             connectionManager.Connect(wire3, wire4);
-            Assert.IsTrue(wire1.Peek().Value);
-            Assert.IsTrue(wire2.Peek().Value);
-            Assert.IsTrue(wire3.Peek().Value);
-            Assert.IsTrue(wire4.Peek().Value);
+            Assert.IsTrue(wire1.Peek());
+            Assert.IsTrue(wire2.Peek());
+            Assert.IsTrue(wire3.Peek());
+            Assert.IsTrue(wire4.Peek());
 
             connectionManager.Disconnect(wire2, wire3);
-            Assert.IsTrue(wire1.Peek().Value);
-            Assert.IsTrue(wire2.Peek().Value);
-            Assert.IsTrue(wire3.Peek().Value);
-            Assert.IsTrue(wire4.Peek().Value);
+            Assert.IsTrue(wire1.Peek());
+            Assert.IsTrue(wire2.Peek());
+            Assert.IsTrue(wire3.Peek());
+            Assert.IsTrue(wire4.Peek());
 
             connectionManager.Disconnect(wire1, wire2);
-            Assert.IsTrue(wire1.Peek().Value);
-            Assert.IsFalse(wire2.Peek().Value);
+            Assert.IsTrue(wire1.Peek());
+            Assert.IsFalse(wire2.Peek());
 
             connectionManager.Disconnect(wire3, wire4);
-            Assert.IsFalse(wire3.Peek().Value);
-            Assert.IsTrue(wire4.Peek().Value);
+            Assert.IsFalse(wire3.Peek());
+            Assert.IsTrue(wire4.Peek());
         }
 
         [Test]
@@ -244,14 +244,14 @@ namespace Coil.Tests
 
             connectionManager.Connect(wire1, wire2);
 
-            wire1.Push(new BoolValue(true));
+            wire1.Power();
 
-            Assert.AreEqual(1, wire1.ValueProvider.PushSourceWires.Count);
-            Assert.Contains(wire1, wire1.ValueProvider.PushSourceWires);
+            Assert.AreEqual(1, wire1.PowerProvider.PowerSourceWires.Count);
+            Assert.Contains(wire1, wire1.PowerProvider.PowerSourceWires);
 
-            wire1.ValueProvider.Reset();
-            Assert.IsEmpty(wire1.ValueProvider.PushSourceWires);
-            Assert.IsFalse(wire1.Peek().Value);
+            wire1.PowerProvider.Reset();
+            Assert.IsEmpty(wire1.PowerProvider.PowerSourceWires);
+            Assert.IsFalse(wire1.Peek());
         }
 
         [Test]
@@ -264,14 +264,14 @@ namespace Coil.Tests
             Wire wire3 = new Wire();
             Wire wire4 = new Wire();
 
-            wire1.Push(new BoolValue(true));
-            wire4.Push(new BoolValue(true));
+            wire1.Power();
+            wire4.Power();
             connectionManager.Connect(wire1, wire2);
             connectionManager.Connect(wire2, wire3);
             connectionManager.Connect(wire3, wire4);
 
-            Assert.Contains(wire1, wire1.ValueProvider.PushSourceWires);
-            Assert.Contains(wire4, wire1.ValueProvider.PushSourceWires);
+            Assert.Contains(wire1, wire1.PowerProvider.PowerSourceWires);
+            Assert.Contains(wire4, wire1.PowerProvider.PowerSourceWires);
         }
     }
 }
