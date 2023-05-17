@@ -109,8 +109,8 @@ namespace Coil.Tests
             Assert.IsTrue(wire3.Peek());
             Assert.IsTrue(wire4.Peek());
 
-            Assert.Contains(wire1, wire1.PowerProvider.PowerSourceWires);
-            Assert.Contains(wire4, wire1.PowerProvider.PowerSourceWires);
+            Assert.Contains(wire1, wire1.PowerSource.PowerSourceWires);
+            Assert.Contains(wire4, wire1.PowerSource.PowerSourceWires);
         }
 
         [Test]
@@ -246,11 +246,11 @@ namespace Coil.Tests
 
             wire1.Power();
 
-            Assert.AreEqual(1, wire1.PowerProvider.PowerSourceWires.Count);
-            Assert.Contains(wire1, wire1.PowerProvider.PowerSourceWires);
+            Assert.AreEqual(1, wire1.PowerSource.PowerSourceWires.Count);
+            Assert.Contains(wire1, wire1.PowerSource.PowerSourceWires);
 
-            wire1.PowerProvider.Reset();
-            Assert.IsEmpty(wire1.PowerProvider.PowerSourceWires);
+            wire1.PowerSource.Reset();
+            Assert.IsEmpty(wire1.PowerSource.PowerSourceWires);
             Assert.IsFalse(wire1.Peek());
         }
 
@@ -270,8 +270,8 @@ namespace Coil.Tests
             connectionManager.Connect(wire2, wire3);
             connectionManager.Connect(wire3, wire4);
 
-            Assert.Contains(wire1, wire1.PowerProvider.PowerSourceWires);
-            Assert.Contains(wire4, wire1.PowerProvider.PowerSourceWires);
+            Assert.Contains(wire1, wire1.PowerSource.PowerSourceWires);
+            Assert.Contains(wire4, wire1.PowerSource.PowerSourceWires);
         }
     }
 }

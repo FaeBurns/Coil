@@ -27,13 +27,13 @@ namespace Coil.Connections
                 throw new ArgumentException("Cannot connect a wire to itself");
 
             // get value source to use from wire1
-            SynchronizedPowerSource newSharedProvider = wire1.PowerProvider;
+            SynchronizedPowerSource newSharedProvider = wire1.PowerSource;
 
             // merge source wire collections
-            newSharedProvider.PowerSourceWires.AddRange(wire2.PowerProvider.PowerSourceWires);
+            newSharedProvider.PowerSourceWires.AddRange(wire2.PowerSource.PowerSourceWires);
 
             // share to wire2
-            wire2.PowerProvider = newSharedProvider;
+            wire2.PowerSource = newSharedProvider;
 
             // if the wires do not have any recorded connections
             // add them to the dictionary
@@ -69,12 +69,15 @@ namespace Coil.Connections
                 _globalWireConnections[connectedWire].Remove(connectedWire);
 
                 // set value provider token on connected wire
-                connectedWire.PowerProvider = newSharedProvider;
+                connectedWire.PowerSource = newSharedProvider;
             }
 
             // perform local connections
             AddLocalConnection(wire1, wire2);
             AddLocalConnection(wire2, wire1);
+
+            // notify of potential state change
+            newSharedProvider.NotifyStateChanged();
         }
 
         public void Disconnect(Wire wire1, Wire wire2)
@@ -114,7 +117,7 @@ namespace Coil.Connections
             List<Wire> pushingWiresInFlood1 = new List<Wire>();
             List<Wire> pushingWiresInFlood2 = new List<Wire>();
 
-            foreach (Wire pushingWire in wire1.PowerProvider.PowerSourceWires)
+            foreach (Wire pushingWire in wire1.PowerSource.PowerSourceWires)
             {
                 if (floodResult.Contains(pushingWire))
                     pushingWiresInFlood1.Add(pushingWire);
@@ -122,9 +125,9 @@ namespace Coil.Connections
                 else if (wire2FloodResult.Contains(pushingWire))
                     pushingWiresInFlood2.Add(pushingWire);
             }
-            
+
             // set the source wires on wire1 to the flood find result - removes all no longer connected
-            wire1.PowerProvider.PowerSourceWires = pushingWiresInFlood1;
+            wire1.PowerSource.PowerSourceWires = pushingWiresInFlood1;
 
             foreach (Wire wire in floodResult)
             {
@@ -136,11 +139,11 @@ namespace Coil.Connections
                 _globalWireConnections[wire].Remove(wire);
 
                 // set value provider to the one on wire1
-                wire.PowerProvider = wire1.PowerProvider;
+                wire.PowerSource = wire1.PowerSource;
             }
 
             // give wire2 a new value provider
-            wire2.PowerProvider = new SynchronizedPowerSource
+            wire2.PowerSource = new SynchronizedPowerSource
             {
                 PowerSourceWires = pushingWiresInFlood2,
             };
@@ -156,7 +159,7 @@ namespace Coil.Connections
                 _globalWireConnections[wire].Remove(wire);
 
                 //set value provider to the one on value2
-                wire.PowerProvider = wire2.PowerProvider;
+                wire.PowerSource = wire2.PowerSource;
             }
 
             // remove wires from connection mappings if they have no connections
@@ -171,6 +174,10 @@ namespace Coil.Connections
 
             if (_globalWireConnections[wire2].Count == 0)
                 _globalWireConnections.Remove(wire2);
+
+            // notify of potential state change
+            wire1.PowerSource.NotifyStateChanged();
+            wire2.PowerSource.NotifyStateChanged();
         }
 
         private bool FloodFindRecursive(Wire wire, Wire target, HashSet<Wire> found)
@@ -218,31 +225,31 @@ namespace Coil.Connections
 
         public bool HasLocalConnections(Wire wire)
         {
-            if (_localWireConnections.ContainsKey(wire))
-                return _localWireConnections[wire].Count > 0;
+            if (_localWireConnections.TryGetValue(wire, out LocalMapping value))
+                return value.Count > 0;
             return false;
         }
 
         public bool HasGlobalConnections(Wire wire)
         {
-            if (_globalWireConnections.ContainsKey(wire))
-                return _globalWireConnections[wire].Count > 0;
+            if (_globalWireConnections.TryGetValue(wire, out HashSet<Wire> value))
+                return value.Count > 0;
             return false;
         }
 
         [ExcludeFromCodeCoverage]
         public bool HasLocalConnectionTo(Wire wire1, Wire wire2)
         {
-            if (_localWireConnections.ContainsKey(wire1))
-                return _localWireConnections[wire1].ContainsKey(wire2);
+            if (_localWireConnections.TryGetValue(wire1, out LocalMapping value))
+                return value.ContainsKey(wire2);
             return false;
         }
 
         [ExcludeFromCodeCoverage]
         public bool HasGlobalConnectionTo(Wire wire1, Wire wire2)
         {
-            if (_globalWireConnections.ContainsKey(wire1))
-                return _globalWireConnections[wire1].Contains(wire2);
+            if (_globalWireConnections.TryGetValue(wire1, out HashSet<Wire> value))
+                return value.Contains(wire2);
             return false;
         }
 

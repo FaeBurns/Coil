@@ -80,8 +80,8 @@ namespace Coil.Tests
             connectionManager.Connect(wire, wire2);
             connectionManager.Connect(wire2, wire3);
 
-            Assert.AreSame(wire.PowerProvider, wire2.PowerProvider);
-            Assert.AreSame(wire.PowerProvider, wire3.PowerProvider);
+            Assert.AreSame(wire.PowerSource, wire2.PowerSource);
+            Assert.AreSame(wire.PowerSource, wire3.PowerSource);
         }
 
         [Test]
@@ -125,7 +125,7 @@ namespace Coil.Tests
             Wire wire1 = new Wire(powerSource);
             Wire wire2 = new Wire(powerSource);
 
-            Assert.AreSame(wire1.PowerProvider, wire2.PowerProvider);
+            Assert.AreSame(wire1.PowerSource, wire2.PowerSource);
         }
 
         [Test]
@@ -237,11 +237,11 @@ namespace Coil.Tests
 
             connectionManager.Connect(wire1, wire2);
 
-            Assert.AreSame(wire1.PowerProvider, wire2.PowerProvider);
+            Assert.AreSame(wire1.PowerSource, wire2.PowerSource);
 
             connectionManager.Disconnect(wire1, wire2);
 
-            Assert.AreNotSame(wire1.PowerProvider, wire2.PowerProvider);
+            Assert.AreNotSame(wire1.PowerSource, wire2.PowerSource);
         }
 
         [Test]
@@ -258,15 +258,15 @@ namespace Coil.Tests
             connectionManager.Connect(wire2, wire3);
             connectionManager.Connect(wire3, wire4);
 
-            Assert.AreSame(wire1.PowerProvider, wire2.PowerProvider);
-            Assert.AreSame(wire1.PowerProvider, wire3.PowerProvider);
-            Assert.AreSame(wire1.PowerProvider, wire4.PowerProvider);
+            Assert.AreSame(wire1.PowerSource, wire2.PowerSource);
+            Assert.AreSame(wire1.PowerSource, wire3.PowerSource);
+            Assert.AreSame(wire1.PowerSource, wire4.PowerSource);
 
             connectionManager.Disconnect(wire2, wire3);
 
-            Assert.AreSame(wire1.PowerProvider, wire2.PowerProvider);
-            Assert.AreNotSame(wire2.PowerProvider, wire3.PowerProvider);
-            Assert.AreSame(wire3.PowerProvider, wire4.PowerProvider);
+            Assert.AreSame(wire1.PowerSource, wire2.PowerSource);
+            Assert.AreNotSame(wire2.PowerSource, wire3.PowerSource);
+            Assert.AreSame(wire3.PowerSource, wire4.PowerSource);
         }
 
         [Test]

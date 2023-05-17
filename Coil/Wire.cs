@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using Coil.Connections;
 
 namespace Coil
@@ -9,16 +10,22 @@ namespace Coil
     /// </summary>
     public class Wire
     {
+        private SynchronizedPowerSource _powerSource;
 
 #if DEBUG
         private readonly int _wireIndex;
         private static int _wireCount;
 #endif
 
+        /// <summary>
+        /// Event fired when the wire's power or connection state changes.
+        /// </summary>
+        public event EventHandler<PowerStateChangedEventArgs> StateChanged;
+
         [ExcludeFromCodeCoverage]
-        public Wire(SynchronizedPowerSource powerSource)
+        internal Wire(SynchronizedPowerSource powerSource)
         {
-            PowerProvider = powerSource;
+            PowerSource = powerSource;
 #if DEBUG
             _wireIndex = _wireCount;
             _wireCount++;
@@ -28,7 +35,7 @@ namespace Coil
         [ExcludeFromCodeCoverage]
         public Wire()
         {
-            PowerProvider = new SynchronizedPowerSource();
+            PowerSource = new SynchronizedPowerSource();
 #if DEBUG
             _wireIndex = _wireCount;
             _wireCount++;
@@ -38,14 +45,26 @@ namespace Coil
         /// <summary>
         /// Gets or Sets the value source that synchronizes the value across wires
         /// </summary>
-        internal SynchronizedPowerSource PowerProvider { get; set; }
+        internal SynchronizedPowerSource PowerSource
+        {
+            get => _powerSource;
+            set
+            {
+                // remove listener from old power source and add it to the new one
+                // old one won't exist if setting for the first time
+                if (_powerSource != null)
+                    _powerSource.StateChanged -= StateChangedPassthrough;
+                _powerSource = value;
+                _powerSource.StateChanged += StateChangedPassthrough;
+            }
+        }
 
         /// <summary>
         /// Powers this wire.
         /// </summary>
         public void Power()
         {
-            PowerProvider.MarkPowered(this);
+            PowerSource.MarkPowered(this);
         }
 
         /// <summary>
@@ -53,7 +72,7 @@ namespace Coil
         /// </summary>
         public void UnPower()
         {
-            PowerProvider.MarkUnpowered(this);
+            PowerSource.MarkUnpowered(this);
         }
 
         /// <summary>
@@ -62,7 +81,7 @@ namespace Coil
         /// <returns>The resulting value.</returns>
         public bool Peek()
         {
-            return PowerProvider.IsPowered;
+            return PowerSource.IsPowered;
         }
 
         /// <summary>
@@ -70,7 +89,7 @@ namespace Coil
         /// </summary>
         public void Clear()
         {
-            PowerProvider.Reset();
+            PowerSource.Reset();
         }
 
 #if DEBUG
@@ -80,5 +99,10 @@ namespace Coil
             return base.ToString() + (_wireIndex + 1);
         }
 #endif
+        private void StateChangedPassthrough(object _, PowerStateChangedEventArgs e)
+        {
+            Console.WriteLine("State changed event received");
+            StateChanged?.Invoke(this, e);
+        }
     }
 }
